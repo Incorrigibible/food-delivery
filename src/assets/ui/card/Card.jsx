@@ -1,148 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export const Card = (props) => {
-  const cardData = props.item;
-  const [currentCardData, setCurrentCardData] = useState(props.menu);
+  const { item, handleAddToCart } = props;
+  const initialPrice = item.price || 0;
 
-  const handleTypeOfDoughChange = (doughType, index) => {
-    const selectedCard = { ...currentCardData }; 
-    const selectedCategory = selectedCard[props.currentCategory];
-    const selectedItem = selectedCategory[index];
-  
-    // Преобразование строки с ценой в числовое значение с использованием parseInt
-    if (!selectedItem.originalPrice) {
-      selectedItem.originalPrice = parseInt(selectedItem.price, 10) || 0;
-    }
-  
-    // Если тип теста не меняется, выходим из функции
-    if (selectedItem.doughType === doughType) {
+  const [currentItem, setCurrentItem] = useState({ ...item, price: initialPrice });
+  const [currentPrice, setCurrentPrice] = useState(initialPrice);
+
+  const handleAddToCartClick = () => {
+    handleAddToCart(currentItem);
+  };
+
+  const handlePizzaChange = (sizeOrDough) => {
+    if (sizeOrDough === currentItem.size || sizeOrDough === currentItem.doughType) {
       return;
     }
-  
-    // Возврат к исходной цене, если был выбран традиционный тип теста
-    if (selectedItem.doughType === 'тонкое') {
-      selectedItem.price = selectedItem.originalPrice;
-      delete selectedItem.originalPrice;
-    }
-  
-    // Обновление типа теста
-    selectedItem.doughType = doughType;
-  
-    // Вычитание 50 при выборе тонкого теста
-    if (doughType === 'тонкое') {
-      selectedItem.price -= 50;
-    }
-    // Обновление состояния с новыми данными о пицце
-    setCurrentCardData({ ...selectedCard });
-    console.log(currentCardData)
-  };
 
-  const handleSizeChange = (size, index) => {
-    const selectedCard = { ...currentCardData }; 
-    const selectedCategory = selectedCard[props.currentCategory];
-    const selectedItem = selectedCategory[index];
-    console.log(props.item.price)
-  
-    selectedItem.originalPrice = selectedItem.price;
-  
-    switch (size) {
-      case 30:
-        selectedItem.price = props.item.price + 50;
-        selectedItem.size = size+'см'; 
-        break;
-      case 38:
-        selectedItem.price = props.item.price + 100; 
-        selectedItem.size = size+'см';
+    const updatedItem = { ...currentItem };
+
+    switch (sizeOrDough) {
+      case "традиционное":
+      case "тонкое":
+        updatedItem.doughType = sizeOrDough;
         break;
       case 26:
-        // Для размера 26 стоимость остается без изменений
-        selectedItem.price = props.item.price;
-        selectedItem.size = size+'см';
-       
+      case 30:
+      case 38:
+        updatedItem.size = `${sizeOrDough}см`;
+        break;
+      default:
         break;
     }
-  
-    // Обновление состояния с новыми данными о пицце
-    setCurrentCardData({ ...selectedCard });
-    console.log(currentCardData)
+
+    setCurrentItem(updatedItem);
   };
 
+  useEffect(() => {
+    let priceChange = 0;
+
+    switch (currentItem.size) {
+      case "26см":
+        priceChange = currentItem.doughType === "тонкое" ? -50 : 0;
+        break;
+      case "30см":
+        priceChange = currentItem.doughType === "традиционное" ? 50 : 0;
+        break;
+      case "38см":
+        priceChange = currentItem.doughType === "традиционное" ? 100 : 50;
+        break;
+      default:
+        break;
+    }
+
+    const newPrice = initialPrice + priceChange;
+    setCurrentPrice(newPrice);
+    setCurrentItem((prevItem) => ({ ...prevItem, price: newPrice }));
+  }, [currentItem.size, currentItem.doughType]);
+
   return (
-    <li
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "0 20px",
-      }}
-    >
-      <img
-        src={cardData.imgPath}
-        alt={cardData.name}
-        style={{
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          width: "100%",
-        }}
-      />
-      <h3>{cardData.name}</h3>
-      {!cardData.doughType ? null : (
+    <li style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 20px" }}>
+      <img src={item.imgPath} alt={item.name} style={{ backgroundRepeat: "no-repeat", backgroundSize: "cover", width: "100%" }} />
+      <h3>{item.name}</h3>
+      {item.doughType && (
         <div>
-          <div
-            style={{
-              display: "flex",
-              width: "100%",
-            }}
-          >
-            <button
-              onClick={() => handleTypeOfDoughChange("традиционное", props.index)}
-              style={{
-                flex: "1",
-                backgroundColor: currentCardData[props.currentCategory][props.index].doughType === 'традиционное' ? 'lightgreen' : '',
-              }}
-            >
+          <div style={{ display: "flex", width: "100%" }}>
+            <button onClick={() => handlePizzaChange("традиционное")} style={{ flex: "1", backgroundColor: currentItem.doughType === "традиционное" ? "lightgreen" : "" }}>
               традиционное
             </button>
-            <button
-              onClick={() => handleTypeOfDoughChange("тонкое", props.index)}
-              style={{ flex: "1",
-              backgroundColor: currentCardData[props.currentCategory][props.index].doughType === 'тонкое' ? 'lightgreen' : '',
-            }}
-            >
+            <button onClick={() => handlePizzaChange("тонкое")} style={{ flex: "1", backgroundColor: currentItem.doughType === "тонкое" ? "lightgreen" : "" }}>
               тонкое
             </button>
           </div>
-
-          <div
-            style={{
-              display: "flex",
-            }}
-          >
-            <button onClick={() => handleSizeChange(26, props.index)}
-            style={{
-              backgroundColor:
-              parseInt(currentCardData[props.currentCategory][props.index].size) === 26
-                ? 'lightblue'
-                : '',
-            }}>26см</button>
-            <button onClick={() => handleSizeChange(30, props.index)}
-            style={{
-              backgroundColor:
-              parseInt(currentCardData[props.currentCategory][props.index].size) === 30
-                ? 'lightblue'
-                : '',
-            }}>30см</button>
-            <button onClick={() => handleSizeChange(38, props.index)}
-            style={{
-              backgroundColor:
-              parseInt(currentCardData[props.currentCategory][props.index].size) === 38
-                ? 'lightblue'
-                : '',
-            }}>38см</button>
+          <div style={{ display: "flex" }}>
+            {[26, 30, 38].map((size) => (
+              <button key={size} onClick={() => handlePizzaChange(size)} style={{ backgroundColor: currentItem.size === `${size}см` ? "lightblue" : "" }}>
+                {`${size}см`}
+              </button>
+            ))}
           </div>
         </div>
       )}
-      <p>Price: {currentCardData[props.currentCategory][props.index].price}</p>
+      <p>Price: {currentPrice}</p>
+      <button onClick={handleAddToCartClick}>
+        Добавить
+      </button>
     </li>
   );
 };

@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react';
 import { RenderCards } from '../../assets/ui/renderCards/RenderCards';
 
 
-export const Home = () => {
-
+export const Home = (props) => {
   const [menu, setMenu] = useState([]);
 
   const [selectedCategory, setSelectedCategory] = useState(null)
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
   }
+  
 
   useEffect(() => {
     async function fetchMenu() {
@@ -22,6 +22,8 @@ export const Home = () => {
       } catch (error) {
         console.error('Error fetching menu:', error);
       }
+
+     
     }
     fetchMenu();
   }, []);
@@ -37,9 +39,13 @@ export const Home = () => {
         flexDirection: 'column',
         padding: '10px 20px',
       }}>
-            <Header/>
+            <Header currentCart={props.currentCart}/>
             <MenuReel menu={menu} onCategoryChange={handleCategoryChange}/>
-            <RenderCards menu={menu} currentCategory={selectedCategory}/>
+            <RenderCards
+        menu={menu}
+        currentCategory={selectedCategory}
+        handleAddToCart={props.handleAddToCart} // Передача handleAddToCart в RenderCards
+      />
         </div>
   )
 }

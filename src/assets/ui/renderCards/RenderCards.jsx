@@ -1,16 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "../card/Card";
+import {v4} from 'uuid'
 
-export const RenderCards = ({ menu, currentCategory }) => {
+export const RenderCards = ({ menu, currentCategory, handleAddToCart }) => {
   const categoryItems = menu[currentCategory] || [];
-
-  const [currentCardData, setCurrentCardData] = useState(menu);
-
-  const handleCardDataChange = (newCardData) => {
-    setCurrentCardData(newCardData);
+  const style = {
+    margin: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '8px', boxSizing: 'border-box'
   }
-
   return (
     <ul style={{ 
       display: 'grid', 
@@ -19,9 +16,9 @@ export const RenderCards = ({ menu, currentCategory }) => {
     }}>
       {categoryItems.map((item, index) => (
         
-        <li key={index} style={{ margin: '10px', padding: '10px', border: '1px solid #ccc', borderRadius: '8px', boxSizing: 'border-box' }}>
-          <Card item={item} index={index} currentCategory={currentCategory} menu={menu} onUpdateCardData={handleCardDataChange}/>
-        </li>
+        <div key={v4()} style={style}>
+          <Card item={item}  currentCategory={currentCategory} menu={menu} handleAddToCart={handleAddToCart}/>
+        </div>
       ))}
     </ul>
   );

@@ -1,7 +1,7 @@
 import { Logo } from '../assets/ui/logo/Logo'
 import { Cart } from '../assets/ui/cart/Cart'
 
-export const Header = () =>{
+export const Header = (props) =>{
   return (
     <>
       <div style={{
@@ -9,7 +9,7 @@ export const Header = () =>{
         justifyContent: 'space-between',
       }}>
         <Logo/>
-        <Cart/>
+        <Cart currentCart={props.currentCart}/>
       </div>
     </>
   )
